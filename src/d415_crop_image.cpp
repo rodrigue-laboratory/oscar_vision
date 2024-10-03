@@ -40,6 +40,7 @@
 #include <ros/ros.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <sensor_msgs/Image.h>
+#include <librealsense2/rsutil.h>
 
 void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
 {
@@ -48,8 +49,37 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
   cam_model_.fromCameraInfo(info_msg);
   // projection_matrix is the matrix you should use if you don't want to use project3dToPixel() and want to use opencv API
   cv::Matx34d projection_matrix = cam_model_.fullProjectionMatrix();
+  std::cout << "projection from opencvn\n";
   std::cout << cam_model_.project3dToPixel(cv::Point3d(0.05073265677540176, -0.050817407132633746, 0.4202557940053254))
             << std::endl;
+
+  float pixel[2];
+  float point[3] = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
+
+  rs2_intrinsics intrinsics;
+  intrinsics.coeffs[0] = info_msg->D[0];
+  intrinsics.coeffs[1] = info_msg->D[1];
+  intrinsics.coeffs[2] = info_msg->D[2];
+  intrinsics.coeffs[3] = info_msg->D[3];
+  intrinsics.coeffs[4] = info_msg->D[4];
+  intrinsics.fx = info_msg->K[0];
+  intrinsics.fy = info_msg->K[4];
+  intrinsics.height = info_msg->height;
+  intrinsics.width = info_msg->width;
+
+  if (info_msg->distortion_model == "plumb_bob")
+    intrinsics.model = rs2_distortion::RS2_DISTORTION_BROWN_CONRADY;
+  else
+    throw std::runtime_error("distortion model not supported");
+
+  intrinsics.ppx = info_msg->K[2];
+  intrinsics.ppy = info_msg->K[5];
+
+  rs2_project_point_to_pixel(pixel, &intrinsics, point);
+
+  std::cout << "projection realsense function\n"
+            << "x = " << pixel[0] << "\n"
+            << "y = " << pixel[1] << std::endl;
 }
 
 int main(int argc, char** argv)
