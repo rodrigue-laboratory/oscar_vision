@@ -9,6 +9,7 @@ find_package(catkin REQUIRED
   roscpp
   sensor_msgs
   image_geometry
+  cv_bridge
 )
 
 catkin_package(
@@ -20,6 +21,7 @@ catkin_package(
     roscpp
     sensor_msgs
     image_geometry
+    cv_bridge
 )
 
 
