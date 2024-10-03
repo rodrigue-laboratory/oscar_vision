@@ -32,15 +32,14 @@ add_library(${PROJECT_NAME}
   src/realsense.cpp
 )
 
-add_executable(d415_crop_image src/d415_crop_image.cpp)
-target_link_libraries(d415_crop_image ${realsense2_LIBRARY} ${catkin_LIBRARIES})
-# target_compile_features(open_lid_biorad_t100 PRIVATE cxx_std_17)
+add_executable(d415_projection src/d415_projection.cpp)
+target_link_libraries(d415_projection ${realsense2_LIBRARY} ${catkin_LIBRARIES})
 
 
 
 install(TARGETS
   # ${PROJECT_NAME}
-  d415_crop_image
+  d415_projection
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Captain Yoshi
-   Desc: Crop an image wrt. 3D coordinates
+   Desc: Project 3D coordinates to pixels
 */
 
 // ROS
