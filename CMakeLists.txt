@@ -12,8 +12,8 @@ find_package(catkin REQUIRED
 )
 
 catkin_package(
-  # LIBRARIES
-  #   ${PROJECT_NAME}
+  LIBRARIES
+    ${PROJECT_NAME}
   INCLUDE_DIRS
     include
   CATKIN_DEPENDS
@@ -28,8 +28,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# add_library(${PROJECT_NAME}
-# )
+add_library(${PROJECT_NAME}
+  src/realsense.cpp
+)
 
 add_executable(d415_crop_image src/d415_crop_image.cpp)
 target_link_libraries(d415_crop_image ${realsense2_LIBRARY} ${catkin_LIBRARIES})
