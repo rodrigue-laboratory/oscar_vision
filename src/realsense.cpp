@@ -33,25 +33,25 @@ RealSenseCamera::RealSenseCamera(ros::NodeHandle& nh, const std::string& namespa
 void RealSenseCamera::RGBImageCallback(const sensor_msgs::Image::ConstPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(mutex_rgb_image_);
-  rgb_image_ = *msg;
+  rgb_image_ = msg;
 }
 
 void RealSenseCamera::DepthImageCallback(const sensor_msgs::Image::ConstPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(mutex_depth_image_);
-  depth_image_ = *msg;
+  depth_image_ = msg;
 }
 
 void RealSenseCamera::RGBCameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(mutex_rgb_camera_info_);
-  rgb_camera_info_ = *msg;
+  rgb_camera_info_ = msg;
 }
 
 void RealSenseCamera::DepthCameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg)
 {
   const std::lock_guard<std::mutex> lock(mutex_depth_camera_info_);
-  depth_camera_info_ = *msg;
+  depth_camera_info_ = msg;
 }
 
 bool RealSenseCamera::enableStreamingSensors()
@@ -95,25 +95,25 @@ bool RealSenseCamera::resetCamera()
   return true;
 }
 
-sensor_msgs::CameraInfo RealSenseCamera::getRGBCameraInfo()
+sensor_msgs::CameraInfo::ConstPtr RealSenseCamera::getRGBCameraInfo()
 {
   const std::lock_guard<std::mutex> lock(mutex_rgb_camera_info_);
   return rgb_camera_info_;
 }
 
-sensor_msgs::CameraInfo RealSenseCamera::getDepthCameraInfo()
+sensor_msgs::CameraInfo::ConstPtr RealSenseCamera::getDepthCameraInfo()
 {
   const std::lock_guard<std::mutex> lock(mutex_depth_camera_info_);
   return depth_camera_info_;
 }
 
-sensor_msgs::Image RealSenseCamera::getRGBImage()
+sensor_msgs::Image::ConstPtr RealSenseCamera::getRGBImage()
 {
   const std::lock_guard<std::mutex> lock(mutex_rgb_image_);
   return rgb_image_;
 }
 
-sensor_msgs::Image RealSenseCamera::getDepthImage()
+sensor_msgs::Image::ConstPtr RealSenseCamera::getDepthImage()
 {
   const std::lock_guard<std::mutex> lock(mutex_depth_image_);
   return depth_image_;

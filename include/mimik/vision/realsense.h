@@ -17,10 +17,10 @@ public:
   bool disableStreamingSensors();
 
   bool resetCamera();
-  sensor_msgs::CameraInfo getRGBCameraInfo();
-  sensor_msgs::CameraInfo getDepthCameraInfo();
-  sensor_msgs::Image getRGBImage();
-  sensor_msgs::Image getDepthImage();
+  sensor_msgs::CameraInfo::ConstPtr getRGBCameraInfo();
+  sensor_msgs::CameraInfo::ConstPtr getDepthCameraInfo();
+  sensor_msgs::Image::ConstPtr getRGBImage();
+  sensor_msgs::Image::ConstPtr getDepthImage();
 
 private:
   void RGBImageCallback(const sensor_msgs::Image::ConstPtr& msg);
@@ -36,10 +36,10 @@ private:
   std::shared_ptr<ros::Subscriber> subscriber_rgb_image_;
   std::shared_ptr<ros::Subscriber> subscriber_depth_image_;
 
-  sensor_msgs::Image rgb_image_;
-  sensor_msgs::Image depth_image_;
-  sensor_msgs::CameraInfo rgb_camera_info_;
-  sensor_msgs::CameraInfo depth_camera_info_;
+  sensor_msgs::Image::ConstPtr rgb_image_;
+  sensor_msgs::Image::ConstPtr depth_image_;
+  sensor_msgs::CameraInfo::ConstPtr rgb_camera_info_;
+  sensor_msgs::CameraInfo::ConstPtr depth_camera_info_;
 
   std::mutex mutex_rgb_image_;
   std::mutex mutex_depth_image_;
