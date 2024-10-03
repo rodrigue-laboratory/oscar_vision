@@ -34,6 +34,9 @@ add_library(${PROJECT_NAME}
   src/realsense.cpp
 )
 
+add_executable(d415_crop src/d415_crop.cpp)
+target_link_libraries(d415_crop ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES})
+
 add_executable(d415_projection src/d415_projection.cpp)
 target_link_libraries(d415_projection ${realsense2_LIBRARY} ${catkin_LIBRARIES})
 
@@ -41,6 +44,7 @@ target_link_libraries(d415_projection ${realsense2_LIBRARY} ${catkin_LIBRARIES})
 
 install(TARGETS
   ${PROJECT_NAME}
+  d415_crop
   d415_projection
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
