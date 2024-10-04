@@ -101,30 +101,34 @@ int main(int argc, char** argv)
   spinner.start();
 
   mimik::vision::RealSenseCamera rs(nh, "/camera");
-  ros::Duration(2).sleep();
+  ros::Duration(1).sleep();
   auto image_msg = rs.getRGBImage();
-  std::cout << image_msg << std::endl;
-  ros::Duration(2).sleep();
-  std::cout << image_msg << std::endl;
+  auto info_msg = rs.getRGBCameraInfo();
 
-  auto camera_info_msg = rs.getRGBCameraInfo();
+  if (!image_msg || !info_msg)
+    throw std::runtime_error("Cannot retrieve image or camera info");
 
-  if (!image_msg)
-    throw std::runtime_error("Cannot retrieve image");
+  Eigen::Vector3d topleft_point;
+  topleft_point[0] = -0.055;
+  topleft_point[1] = -0.125;
+  topleft_point[2] = 0.5;
+
+  Eigen::Vector3d bottomright_point;
+  bottomright_point[0] = 0.055;
+  bottomright_point[1] = 0.060;
+  bottomright_point[2] = 0.5;
 
   cv::namedWindow(OPENCV_WINDOW);
-
-  std::cout << image_msg << std::endl;
   auto cv_ptr = cv_bridge::toCvShare(image_msg);
-
   cv::imshow(OPENCV_WINDOW, cv_ptr->image);
   cv::waitKey(0);
 
+  cv::Mat cropped_image = mimik::vision::cropImageFrom3DPoints(info_msg,            //
+                                                               image_msg,           //
+                                                               topleft_point,       // top    = -Y axis, left  = -X axis
+                                                               bottomright_point);  // bottom = +Y axis, right = +X axis
+
+  cv::imshow(OPENCV_WINDOW, cropped_image);
+  cv::waitKey(0);
   cv::destroyWindow(OPENCV_WINDOW);
-
-  // cv_bridge::toCvShare(const sensor_msgs::Image &source, const boost::shared_ptr<const void> &tracked_object)
-
-  // ros::Subscriber sub = nh.subscribe("/camera/color/camera_info", 1000, cameraInfoCallback);
-
-  ros::waitForShutdown();
 }
