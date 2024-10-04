@@ -68,6 +68,29 @@ void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen
   point[2] = static_cast<double>(fpoint[2]);
 }
 
+cv::Mat cropImageFrom3DPoints(const sensor_msgs::CameraInfo::ConstPtr& info_msg,
+                              const sensor_msgs::Image::ConstPtr& image_msg, const Eigen::Vector3d& topleft_point,
+                              const Eigen::Vector3d& bottomright_point)
+{
+  Eigen::Vector2d topleft_pixel;
+  Eigen::Vector2d bottomright_pixel;
+
+  projection(info_msg, topleft_point, topleft_pixel);
+  projection(info_msg, bottomright_point, bottomright_pixel);
+
+  // change to OpenCV format
+  auto cv_ptr = cv_bridge::toCvShare(image_msg);
+
+  // crop image
+  cv::Range row_range(topleft_pixel[0], bottomright_pixel[0]);
+  cv::Range col_range(topleft_pixel[1], bottomright_pixel[1]);
+
+  std::cout << row_range << std::endl;
+  std::cout << col_range << std::endl;
+
+  return cv_ptr->image(col_range, row_range);
+}
+
 RealSenseCamera::RealSenseCamera(ros::NodeHandle& nh, const std::string& namespace_prefix)
 {
   service_client_reset_camera_ = std::make_shared<ros::ServiceClient>(

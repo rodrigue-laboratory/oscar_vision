@@ -8,6 +8,7 @@
 #include <sensor_msgs/Image.h>
 
 #include <librealsense2/h/rs_types.h>
+#include <cv_bridge/cv_bridge.h>
 
 namespace mimik {
 namespace vision {
@@ -22,6 +23,11 @@ void projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::
 /// location within the stream's associated 3D coordinate space
 void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels, double depth,
                   Eigen::Vector3d& point);
+
+cv::Mat cropImageFrom3DPoints(const sensor_msgs::CameraInfo::ConstPtr& info_msg,  //
+                              const sensor_msgs::Image::ConstPtr& image_msg,      //
+                              const Eigen::Vector3d& topleft_point,               // top    = -Y axis, left  = -X axis
+                              const Eigen::Vector3d& bottomright_point);          // bottom = +Y axis, right = +X axis
 
 class RealSenseCamera
 {
