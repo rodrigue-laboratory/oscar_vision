@@ -7,8 +7,31 @@
 #include <dynamic_reconfigure/Reconfigure.h>
 #include <dynamic_reconfigure/IntParameter.h>
 
+#include <librealsense2/rsutil.h>
+
 namespace mimik {
 namespace vision {
+
+void sensorCameraInfoMsgToRS2Intrinsics(const sensor_msgs::CameraInfo::ConstPtr& info_msg, rs2_intrinsics& intrinsics)
+{
+  intrinsics.coeffs[0] = info_msg->D[0];
+  intrinsics.coeffs[1] = info_msg->D[1];
+  intrinsics.coeffs[2] = info_msg->D[2];
+  intrinsics.coeffs[3] = info_msg->D[3];
+  intrinsics.coeffs[4] = info_msg->D[4];
+  intrinsics.fx = info_msg->K[0];
+  intrinsics.fy = info_msg->K[4];
+  intrinsics.height = info_msg->height;
+  intrinsics.width = info_msg->width;
+
+  if (info_msg->distortion_model == "plumb_bob")
+    intrinsics.model = rs2_distortion::RS2_DISTORTION_BROWN_CONRADY;
+  else
+    throw std::runtime_error("distortion model not supported");
+
+  intrinsics.ppx = info_msg->K[2];
+  intrinsics.ppy = info_msg->K[5];
+}
 
 RealSenseCamera::RealSenseCamera(ros::NodeHandle& nh, const std::string& namespace_prefix)
 {
@@ -34,6 +57,42 @@ RealSenseCamera::RealSenseCamera(ros::NodeHandle& nh, const std::string& namespa
 
   topic_rgb_roi_ = namespace_prefix + "/rgb_camera/auto_exposure_roi/set_parameters";
   topic_depth_roi_ = namespace_prefix + "/stereo_module/auto_exposure_roi/set_parameters";
+}
+
+void RealSenseCamera::projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector3d& point,
+                                 Eigen::Vector2d& pixels)
+{
+  rs2_intrinsics intrinsics;
+  sensorCameraInfoMsgToRS2Intrinsics(info_msg, intrinsics);
+
+  float fpixels[2];
+  float fpoint[3];
+  fpoint[0] = static_cast<float>(point[0]);
+  fpoint[1] = static_cast<float>(point[1]);
+  fpoint[2] = static_cast<float>(point[2]);
+
+  rs2_project_point_to_pixel(fpixels, &intrinsics, fpoint);
+
+  pixels[0] = static_cast<double>(fpixels[0]);
+  pixels[1] = static_cast<double>(fpixels[1]);
+}
+
+void RealSenseCamera::deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels,
+                                   double depth, Eigen::Vector3d& point)
+{
+  rs2_intrinsics intrinsics;
+  sensorCameraInfoMsgToRS2Intrinsics(info_msg, intrinsics);
+
+  float fpoint[3];
+  float fpixels[2];
+  fpixels[0] = static_cast<float>(pixels[0]);
+  fpixels[1] = static_cast<float>(pixels[1]);
+
+  rs2_deproject_pixel_to_point(fpoint, &intrinsics, fpixels, depth);
+
+  point[0] = static_cast<double>(fpoint[0]);
+  point[1] = static_cast<double>(fpoint[1]);
+  point[2] = static_cast<double>(fpoint[2]);
 }
 
 void RealSenseCamera::RGBImageCallback(const sensor_msgs::Image::ConstPtr& msg)
