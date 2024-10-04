@@ -33,6 +33,41 @@ void sensorCameraInfoMsgToRS2Intrinsics(const sensor_msgs::CameraInfo::ConstPtr&
   intrinsics.ppy = info_msg->K[5];
 }
 
+void projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector3d& point, Eigen::Vector2d& pixels)
+{
+  rs2_intrinsics intrinsics;
+  sensorCameraInfoMsgToRS2Intrinsics(info_msg, intrinsics);
+
+  float fpixels[2];
+  float fpoint[3];
+  fpoint[0] = static_cast<float>(point[0]);
+  fpoint[1] = static_cast<float>(point[1]);
+  fpoint[2] = static_cast<float>(point[2]);
+
+  rs2_project_point_to_pixel(fpixels, &intrinsics, fpoint);
+
+  pixels[0] = static_cast<double>(fpixels[0]);
+  pixels[1] = static_cast<double>(fpixels[1]);
+}
+
+void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels, double depth,
+                  Eigen::Vector3d& point)
+{
+  rs2_intrinsics intrinsics;
+  sensorCameraInfoMsgToRS2Intrinsics(info_msg, intrinsics);
+
+  float fpoint[3];
+  float fpixels[2];
+  fpixels[0] = static_cast<float>(pixels[0]);
+  fpixels[1] = static_cast<float>(pixels[1]);
+
+  rs2_deproject_pixel_to_point(fpoint, &intrinsics, fpixels, depth);
+
+  point[0] = static_cast<double>(fpoint[0]);
+  point[1] = static_cast<double>(fpoint[1]);
+  point[2] = static_cast<double>(fpoint[2]);
+}
+
 RealSenseCamera::RealSenseCamera(ros::NodeHandle& nh, const std::string& namespace_prefix)
 {
   service_client_reset_camera_ = std::make_shared<ros::ServiceClient>(
@@ -57,42 +92,6 @@ RealSenseCamera::RealSenseCamera(ros::NodeHandle& nh, const std::string& namespa
 
   topic_rgb_roi_ = namespace_prefix + "/rgb_camera/auto_exposure_roi/set_parameters";
   topic_depth_roi_ = namespace_prefix + "/stereo_module/auto_exposure_roi/set_parameters";
-}
-
-void RealSenseCamera::projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector3d& point,
-                                 Eigen::Vector2d& pixels)
-{
-  rs2_intrinsics intrinsics;
-  sensorCameraInfoMsgToRS2Intrinsics(info_msg, intrinsics);
-
-  float fpixels[2];
-  float fpoint[3];
-  fpoint[0] = static_cast<float>(point[0]);
-  fpoint[1] = static_cast<float>(point[1]);
-  fpoint[2] = static_cast<float>(point[2]);
-
-  rs2_project_point_to_pixel(fpixels, &intrinsics, fpoint);
-
-  pixels[0] = static_cast<double>(fpixels[0]);
-  pixels[1] = static_cast<double>(fpixels[1]);
-}
-
-void RealSenseCamera::deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels,
-                                   double depth, Eigen::Vector3d& point)
-{
-  rs2_intrinsics intrinsics;
-  sensorCameraInfoMsgToRS2Intrinsics(info_msg, intrinsics);
-
-  float fpoint[3];
-  float fpixels[2];
-  fpixels[0] = static_cast<float>(pixels[0]);
-  fpixels[1] = static_cast<float>(pixels[1]);
-
-  rs2_deproject_pixel_to_point(fpoint, &intrinsics, fpixels, depth);
-
-  point[0] = static_cast<double>(fpoint[0]);
-  point[1] = static_cast<double>(fpoint[1]);
-  point[2] = static_cast<double>(fpoint[2]);
 }
 
 void RealSenseCamera::RGBImageCallback(const sensor_msgs::Image::ConstPtr& msg)

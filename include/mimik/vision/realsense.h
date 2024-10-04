@@ -14,6 +14,15 @@ namespace vision {
 
 void sensorCameraInfoMsgToRS2Intrinsics(const sensor_msgs::CameraInfo::ConstPtr& info_msg, rs2_intrinsics& intrinsics);
 
+/// takes a point from a stream's 3D coordinate space, and maps it to a 2D pixel location on that stream's images
+void projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector3d& point,
+                Eigen::Vector2d& pixels);
+
+/// takes a 2D pixel location on a stream's images, as well as a depth, specified in meters, and maps it to a 3D point
+/// location within the stream's associated 3D coordinate space
+void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels, double depth,
+                  Eigen::Vector3d& point);
+
 class RealSenseCamera
 {
 public:
@@ -30,15 +39,6 @@ public:
 
   bool setRGBAutoExposureROI(int left, int right, int top, int bottom);
   bool setDepthAutoExposureROI(int left, int right, int top, int bottom);
-
-  /// takes a point from a stream's 3D coordinate space, and maps it to a 2D pixel location on that stream's images
-  static void projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector3d& point,
-                         Eigen::Vector2d& pixels);
-
-  /// takes a 2D pixel location on a stream's images, as well as a depth, specified in meters, and maps it to a 3D point
-  /// location within the stream's associated 3D coordinate space
-  static void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels,
-                           double depth, Eigen::Vector3d& point);
 
 private:
   void RGBImageCallback(const sensor_msgs::Image::ConstPtr& msg);

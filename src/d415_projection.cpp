@@ -66,7 +66,7 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
   std::cout << cam_model_.project3dToPixel(cv::Point3d(point[0], point[1], point[2])) << std::endl;
 
   // realsense projection
-  mimik::vision::RealSenseCamera::projection(info_msg, point, pixel);
+  mimik::vision::projection(info_msg, point, pixel);
 
   std::cout << "Projection realsense2 function\n"
             << "x = " << pixel[0] << "\n"
@@ -74,7 +74,7 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
 
   // realsense deprojection
   Eigen::Vector3d deproject_point;
-  mimik::vision::RealSenseCamera::deprojection(info_msg, pixel, point[2], deproject_point);
+  mimik::vision::deprojection(info_msg, pixel, point[2], deproject_point);
 
   std::cout << "Deproject realsense2" << std::endl;
   std::cout << "x = " << deproject_point[0] << std::endl;
