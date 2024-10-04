@@ -45,16 +45,20 @@
 void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
 {
   std::cout << "===============================cameraInfoCallback===============================" << std::endl;
+  float point[3] = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
+  float pixel[2];
+
+  std::cout << "3D point" << std::endl;
+  std::cout << "x = " << point[0] << std::endl;
+  std::cout << "y = " << point[1] << std::endl;
+  std::cout << "z = " << point[2] << std::endl;
+
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(info_msg);
   // projection_matrix is the matrix you should use if you don't want to use project3dToPixel() and want to use opencv API
   cv::Matx34d projection_matrix = cam_model_.fullProjectionMatrix();
   std::cout << "projection from opencvn\n";
-  std::cout << cam_model_.project3dToPixel(cv::Point3d(0.05073265677540176, -0.050817407132633746, 0.4202557940053254))
-            << std::endl;
-
-  float pixel[2];
-  float point[3] = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
+  std::cout << cam_model_.project3dToPixel(cv::Point3d(point[0], point[1], point[2])) << std::endl;
 
   rs2_intrinsics intrinsics;
   intrinsics.coeffs[0] = info_msg->D[0];
@@ -80,6 +84,14 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
   std::cout << "projection realsense function\n"
             << "x = " << pixel[0] << "\n"
             << "y = " << pixel[1] << std::endl;
+
+  float deproject_point[3];
+  rs2_deproject_pixel_to_point(deproject_point, &intrinsics, pixel, point[2]);
+
+  std::cout << "Deproject realsense2" << std::endl;
+  std::cout << "x = " << deproject_point[0] << std::endl;
+  std::cout << "y = " << deproject_point[1] << std::endl;
+  std::cout << "z = " << deproject_point[2] << std::endl;
 }
 
 int main(int argc, char** argv)
