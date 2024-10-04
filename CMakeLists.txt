@@ -42,7 +42,7 @@ add_executable(d415_crop src/d415_crop.cpp)
 target_link_libraries(d415_crop ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES})
 
 add_executable(d415_projection src/d415_projection.cpp)
-target_link_libraries(d415_projection ${realsense2_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(d415_projection ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES})
 
 
 

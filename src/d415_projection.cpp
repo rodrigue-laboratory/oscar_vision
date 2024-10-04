@@ -42,51 +42,39 @@
 #include <sensor_msgs/Image.h>
 #include <librealsense2/rsutil.h>
 
+#include <mimik/vision/realsense.h>
+
 void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
 {
   std::cout << "===============================cameraInfoCallback===============================" << std::endl;
-  float point[3] = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
-  float pixel[2];
+  // float point[3] = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
+  // float pixel[2];
+
+  Eigen::Vector3d point = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
+  Eigen::Vector2d pixel;
 
   std::cout << "3D point" << std::endl;
   std::cout << "x = " << point[0] << std::endl;
   std::cout << "y = " << point[1] << std::endl;
   std::cout << "z = " << point[2] << std::endl;
 
+  // projection_matrix is the matrix you should use if you don't want to use project3dToPixel() and want to use opencv API
   image_geometry::PinholeCameraModel cam_model_;
   cam_model_.fromCameraInfo(info_msg);
-  // projection_matrix is the matrix you should use if you don't want to use project3dToPixel() and want to use opencv API
   cv::Matx34d projection_matrix = cam_model_.fullProjectionMatrix();
   std::cout << "projection from opencvn\n";
   std::cout << cam_model_.project3dToPixel(cv::Point3d(point[0], point[1], point[2])) << std::endl;
 
-  rs2_intrinsics intrinsics;
-  intrinsics.coeffs[0] = info_msg->D[0];
-  intrinsics.coeffs[1] = info_msg->D[1];
-  intrinsics.coeffs[2] = info_msg->D[2];
-  intrinsics.coeffs[3] = info_msg->D[3];
-  intrinsics.coeffs[4] = info_msg->D[4];
-  intrinsics.fx = info_msg->K[0];
-  intrinsics.fy = info_msg->K[4];
-  intrinsics.height = info_msg->height;
-  intrinsics.width = info_msg->width;
+  // realsense projection
+  mimik::vision::RealSenseCamera::projection(info_msg, point, pixel);
 
-  if (info_msg->distortion_model == "plumb_bob")
-    intrinsics.model = rs2_distortion::RS2_DISTORTION_BROWN_CONRADY;
-  else
-    throw std::runtime_error("distortion model not supported");
-
-  intrinsics.ppx = info_msg->K[2];
-  intrinsics.ppy = info_msg->K[5];
-
-  rs2_project_point_to_pixel(pixel, &intrinsics, point);
-
-  std::cout << "projection realsense function\n"
+  std::cout << "Projection realsense2 function\n"
             << "x = " << pixel[0] << "\n"
             << "y = " << pixel[1] << std::endl;
 
-  float deproject_point[3];
-  rs2_deproject_pixel_to_point(deproject_point, &intrinsics, pixel, point[2]);
+  // realsense deprojection
+  Eigen::Vector3d deproject_point;
+  mimik::vision::RealSenseCamera::deprojection(info_msg, pixel, point[2], deproject_point);
 
   std::cout << "Deproject realsense2" << std::endl;
   std::cout << "x = " << deproject_point[0] << std::endl;
