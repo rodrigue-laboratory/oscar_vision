@@ -48,11 +48,14 @@ target_link_libraries(d415_projection ${PROJECT_NAME} ${realsense2_LIBRARY} ${ca
 add_executable(google_cloud_vision_quickstart src/google_cloud_vision_quickstart.cpp)
 target_link_libraries(google_cloud_vision_quickstart ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
+add_executable(d415_text_detection src/d415_text_detection.cpp)
+target_link_libraries(d415_text_detection ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
 install(TARGETS
   ${PROJECT_NAME}
   d415_crop
   d415_projection
+  d415_text_detection
   google_cloud_vision_quickstart
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
