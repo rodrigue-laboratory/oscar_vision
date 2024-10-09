@@ -42,6 +42,9 @@ add_library(${PROJECT_NAME}
   src/google_cloud_vision_conversions.cpp
 )
 
+add_executable(annotate_images src/annotate_images.cpp)
+target_link_libraries(annotate_images ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
+
 add_executable(d415_crop src/d415_crop.cpp)
 target_link_libraries(d415_crop ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
@@ -57,6 +60,7 @@ target_link_libraries(google_cloud_vision_quickstart ${PROJECT_NAME} ${realsense
 
 install(TARGETS
   ${PROJECT_NAME}
+  annotate_images
   d415_crop
   d415_projection
   d415_text_detection
