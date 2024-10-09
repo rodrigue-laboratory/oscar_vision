@@ -45,12 +45,16 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 
 #include <mimik/vision/realsense.h>
+#include <mimik/vision/opencv.h>
+#include <mimik/vision/google_cloud_ocr.h>
+#include <mimik/vision/google_cloud_vision_conversions.h>
 
 #include <fstream>
 
-static const std::string OPENCV_WINDOW = "Image window";
+static const std::string OPENCV_WINDOW = "Google OCR Text Detection";
 
 int main(int argc, char** argv)
 {
@@ -100,19 +104,52 @@ int main(int argc, char** argv)
     if (!batch)
       throw std::move(batch).status();
 
-    // Find the longest annotation and print it
-    auto result = std::string{};
-    for (auto const& response : batch->responses())
-    {
-      for (auto const& annotation : response.text_annotations())
-      {
-        if (result.size() < annotation.description().size())
-        {
-          result = annotation.description();
-        }
-      }
-    }
-    std::cout << "The image contains this text:\n" << result << "\n";
+    //
+
+    if (batch->responses().size() != 1)
+      throw std::runtime_error("No response from google text detection");
+
+    const auto& document = batch->responses().begin()->full_text_annotation();
+
+    auto bounds_block = mimik::vision::getDocumentBounds(document, mimik::vision::FeatureType::BLOCK);
+    auto bounds_para = mimik::vision::getDocumentBounds(document, mimik::vision::FeatureType::PARA);
+    auto bounds_word = mimik::vision::getDocumentBounds(document, mimik::vision::FeatureType::WORD);
+
+    std::vector<std::vector<cv::Point>> pts_block;
+    std::vector<std::vector<cv::Point>> pts_para;
+    std::vector<std::vector<cv::Point>> pts_word;
+
+    mimik::vision::boundingPolyToOpenCV(bounds_block, pts_block);
+    mimik::vision::boundingPolyToOpenCV(bounds_para, pts_para);
+    mimik::vision::boundingPolyToOpenCV(bounds_word, pts_word);
+
+    cv::namedWindow(OPENCV_WINDOW);
+    auto cv_image = cv_bridge::toCvCopy(image_msg);
+
+    mimik::vision::drawBoxes(cv_image->image, pts_block, cv::Scalar(0, 0, 255));
+    mimik::vision::drawBoxes(cv_image->image, pts_para, cv::Scalar(255, 0, 0));
+    mimik::vision::drawBoxes(cv_image->image, pts_word, cv::Scalar(255, 255, 0));
+
+    cv::imshow(OPENCV_WINDOW, cv_image->image);
+    cv::waitKey(0);
+
+    // // Find the longest annotation and print it
+    // auto result = std::string{};
+    // for (auto const& response: batch->responses())
+    // {
+    //   response.full_text_annot
+    //   // const auto& document = response.full_text_annotation();
+    //   // document->
+
+    //   for (auto const& annotation : response.text_annotations())
+    //   {
+    //     if (result.size() < annotation.description().size())
+    //     {
+    //       result = annotation.description();
+    //     }
+    //   }
+    // }
+    // std::cout << "The image contains this text:\n" << result << "\n";
 
     return 0;
   }
