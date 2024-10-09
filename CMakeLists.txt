@@ -43,10 +43,10 @@ add_library(${PROJECT_NAME}
 )
 
 add_executable(d415_crop src/d415_crop.cpp)
-target_link_libraries(d415_crop ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(d415_crop ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
 add_executable(d415_projection src/d415_projection.cpp)
-target_link_libraries(d415_projection ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES})
+target_link_libraries(d415_projection ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
 add_executable(d415_text_detection src/d415_text_detection.cpp)
 target_link_libraries(d415_text_detection ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} ${PROTOBUF_LIBRARY} google-cloud-cpp::vision)
