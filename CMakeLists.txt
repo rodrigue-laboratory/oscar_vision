@@ -37,6 +37,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/realsense.cpp
+  src/opencv.cpp
   src/google_cloud_vision_conversions.cpp
 )
 
