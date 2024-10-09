@@ -37,6 +37,7 @@ include_directories(
 
 add_library(${PROJECT_NAME}
   src/realsense.cpp
+  src/google_cloud_vision_conversions.cpp
 )
 
 add_executable(d415_crop src/d415_crop.cpp)
