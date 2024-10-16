@@ -62,6 +62,36 @@
 static const std::string OPENCV_WINDOW = "Google OCR Text Detection";
 static const std::string INPUT_PATH_PARAM = "input_path";
 
+void getBackground(const cv::Mat& source, cv::Mat& dst)
+{
+  cv::dilate(source, dst, cv::Mat::ones(3, 3, CV_8U));  // Kernel 3x3
+}
+void getForeground(const cv::Mat& source, cv::Mat& dst)
+{
+  cv::distanceTransform(source, dst, cv::DIST_L2, cv::DIST_MASK_PRECISE, CV_32F);
+  cv::normalize(dst, dst, 0, 1, cv::NORM_MINMAX);
+}
+
+void findMarker(const cv::Mat& sureBg, cv::Mat& markers, std::vector<std::vector<cv::Point>>& contours)
+{
+  cv::findContours(sureBg, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+  // Draw the foreground markers
+  for (size_t i = 0, size = contours.size(); i < size; i++)
+    drawContours(markers, contours, static_cast<int>(i), cv::Scalar(static_cast<int>(i) + 1), -1);
+}
+
+void getRandomColor(std::vector<cv::Vec3b>& colors, size_t size)
+{
+  for (int i = 0; i < size; ++i)
+  {
+    int b = cv::theRNG().uniform(0, 256);
+    int g = cv::theRNG().uniform(0, 256);
+    int r = cv::theRNG().uniform(0, 256);
+    colors.emplace_back(cv::Vec3b((uchar)b, (uchar)g, (uchar)r));
+  }
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "annotate_images");
@@ -97,104 +127,102 @@ int main(int argc, char** argv)
      *  Locate and crop Petri dish
      */
 
-    auto& img_original = imd.image;
+    // auto& img_original = imd.image;
 
-    // scale image if greater then 1920X1280
-    cv::Mat img_scale;
-    double scale = 1.0;
-    int pixels = img_original.rows * img_original.cols;
+    // // scale image if greater then 1920X1280
+    // cv::Mat img_scale;
+    // double scale = 1.0;
+    // int pixels = img_original.rows * img_original.cols;
 
-    if (pixels > max_pixels)
-    {
-      std::cout << pixels / max_pixels << std::endl;
+    // if (pixels > max_pixels)
+    // {
+    //   std::cout << pixels / max_pixels << std::endl;
 
-      scale = 1.0 / (static_cast<double>(pixels) / static_cast<double>(max_pixels));
-      std::cout << "scaling" << scale << std::endl;
+    //   scale = 1.0 / (static_cast<double>(pixels) / static_cast<double>(max_pixels));
+    //   std::cout << "scaling" << scale << std::endl;
 
-      auto dsize = cv::Point(static_cast<int>(scale * img_original.cols), static_cast<int>(scale * img_original.rows));
-      std::cout << "dsize = " << dsize << std::endl;
-      cv::resize(img_original, img_scale, dsize);
-    }
-    else
-    {
-      img_original.copyTo(img_scale);
-    }
+    //   auto dsize = cv::Point(static_cast<int>(scale * img_original.cols), static_cast<int>(scale *
+    //   img_original.rows)); std::cout << "dsize = " << dsize << std::endl; cv::resize(img_original, img_scale, dsize);
+    // }
+    // else
+    // {
+    //   img_original.copyTo(img_scale);
+    // }
 
-    // transform image to grayscale
-    cv::Mat img_grayscale;
-    cv::cvtColor(img_scale, img_grayscale, cv::COLOR_BGR2GRAY);
+    // // transform image to grayscale
+    // cv::Mat img_grayscale;
+    // cv::cvtColor(img_scale, img_grayscale, cv::COLOR_BGR2GRAY);
 
-    // blur grayscale image
-    cv::Mat img_blur;
-    cv::medianBlur(img_grayscale, img_blur, median_blur_order);
+    // // blur grayscale image
+    // cv::Mat img_blur;
+    // cv::medianBlur(img_grayscale, img_blur, median_blur_order);
 
-    // find Petri dish circle with Hough Circle Transform
-    std::vector<cv::Vec3f> circles;
-    cv::HoughCircles(img_blur,            //
-                     circles,             // Each vector is encoded as 3 or 4 element floating-point vector (x,y,radius)
-                     cv::HOUGH_GRADIENT,  //
-                     2,                   // Inverse ratio of the accumulator resolution to the image resolution
-                     min_distance,        // Minimum distance between the centers of the detected circles.
-                     100,                 //
-                     100,                 //
-                     min_radius,          // Minimum circle radius
-                     max_radius);         // Maximum circle radius.
+    // // find Petri dish circle with Hough Circle Transform
+    // std::vector<cv::Vec3f> circles;
+    // cv::HoughCircles(img_blur,            //
+    //                  circles,             // Each vector is encoded as 3 or 4 element floating-point vector
+    //                  (x,y,radius) cv::HOUGH_GRADIENT,  // 2,                   // Inverse ratio of the accumulator
+    //                  resolution to the image resolution min_distance,        // Minimum distance between the centers
+    //                  of the detected circles. 100,                 // 100,                 // min_radius,          //
+    //                  Minimum circle radius max_radius);         // Maximum circle radius.
 
-    if (circles.size() != 1)
-      throw std::runtime_error("Could not find one circle, found " + std::to_string(circles.size()));
+    // if (circles.size() != 1)
+    //   throw std::runtime_error("Could not find one circle, found " + std::to_string(circles.size()));
 
-    // display circle on original image
-    cv::Mat img_circle = img_scale.clone();
-    int cx = circles[0][0];
-    int cy = circles[0][1];
-    int radius = circles[0][2];
+    // // display circle on original image
+    // cv::Mat img_circle = img_scale.clone();
+    // int cx = circles[0][0];
+    // int cy = circles[0][1];
+    // int radius = circles[0][2];
 
-    std::cout << "cx, cy = " << cx << ", " << cy << std::endl;
-    std::cout << "radius = " << radius << std::endl;
+    // std::cout << "cx, cy = " << cx << ", " << cy << std::endl;
+    // std::cout << "radius = " << radius << std::endl;
 
-    // draw the outer circle
-    cv::circle(img_circle, cv::Point(cx, cy), radius, cv::viz::Color::green(), 1);
-    // draw the center of the circle
-    cv::circle(img_circle, cv::Point(cx, cy), 2, cv::viz::Color::red(), 1);
+    // // draw the outer circle
+    // cv::circle(img_circle, cv::Point(cx, cy), radius, cv::viz::Color::green(), 1);
+    // // draw the center of the circle
+    // cv::circle(img_circle, cv::Point(cx, cy), 2, cv::viz::Color::red(), 1);
 
-    // draw filled circle in white on black background as mask
-    cv::Mat mask = cv::Mat::zeros(img_scale.rows, img_scale.cols, img_scale.type());
-    cv::circle(mask, cv::Point(cx, cy), radius, cv::viz::Color::white(), -1);
+    // // draw filled circle in white on black background as mask
+    // cv::Mat mask = cv::Mat::zeros(img_scale.rows, img_scale.cols, img_scale.type());
+    // cv::circle(mask, cv::Point(cx, cy), radius, cv::viz::Color::white(), -1);
 
-    cv::Mat img_mask;
-    cv::bitwise_and(img_scale, mask, img_mask);
+    // cv::Mat img_mask;
+    // cv::bitwise_and(img_scale, mask, img_mask);
 
-    // crop image
-    cv::Mat img_mask_crop = mimik::vision::cropFromCircle(img_mask, cx, cy, radius);
+    // // crop image
+    // cv::Mat img_mask_crop = mimik::vision::cropFromCircle(img_mask, cx, cy, radius);
 
-    // mask original image
-    cv::Mat img_original_mask;
-    cv::Mat img_original_crop;
-    cv::Mat mask_;
-    {
-      int cx_ = static_cast<int>(static_cast<double>(cx) / scale);
-      int cy_ = static_cast<double>(cy) / scale;
-      int radius_ = static_cast<double>(radius) / scale;
+    // // mask original image
+    // cv::Mat img_original_mask;
+    // cv::Mat img_original_crop;
+    // cv::Mat mask_;
+    // {
+    //   int cx_ = static_cast<int>(static_cast<double>(cx) / scale);
+    //   int cy_ = static_cast<double>(cy) / scale;
+    //   int radius_ = static_cast<double>(radius) / scale;
 
-      std::cout << "cx, cy = " << cx_ << ", " << cy_ << std::endl;
-      std::cout << "new radius = " << radius_ << std::endl;
+    //   std::cout << "cx, cy = " << cx_ << ", " << cy_ << std::endl;
+    //   std::cout << "new radius = " << radius_ << std::endl;
 
-      mask_ = cv::Mat::zeros(img_original.rows, img_original.cols, img_original.type());
-      cv::circle(mask_, cv::Point(cx_, cy_), radius_, cv::viz::Color::white(), -1);
+    //   mask_ = cv::Mat::zeros(img_original.rows, img_original.cols, img_original.type());
+    //   cv::circle(mask_, cv::Point(cx_, cy_), radius_, cv::viz::Color::white(), -1);
 
-      cv::bitwise_and(img_original, mask_, img_original_mask);
+    //   cv::bitwise_and(img_original, mask_, img_original_mask);
 
-      int dimaeter = radius * 2;
-      int col_start = cy_ - radius_;
-      int col_end = cy_ + radius_;
-      int row_start = cx_ - radius_;
-      int row_end = cx_ + radius_;
-      img_original_crop = img_original_mask(cv::Range(col_start, col_end), cv::Range(row_start, row_end));
-    }
+    //   int dimaeter = radius * 2;
+    //   int col_start = cy_ - radius_;
+    //   int col_end = cy_ + radius_;
+    //   int row_start = cx_ - radius_;
+    //   int row_end = cx_ + radius_;
+    //   img_original_crop = img_original_mask(cv::Range(col_start, col_end), cv::Range(row_start, row_end));
+    // }
 
     /**
      *  Find colonnies morphology in image using watershed
      */
+
+    auto& img_original_crop = imd.image;
 
     // Convert to grayscale
     cv::Mat img_gray;
@@ -202,10 +230,10 @@ int main(int argc, char** argv)
 
     // Binarize image with appropriate threshold
     // TODO automatic detection by using background grayness intensity
-    cv::Mat img_glob_th_180;
+    cv::Mat img_bin;
     // Set values equal to or above 175 to 0.
     // Set values below 175 to 255.
-    cv::threshold(img_gray, img_glob_th_180, 175, 255, cv::THRESH_BINARY);
+    cv::threshold(img_gray, img_bin, 175, 255, cv::THRESH_BINARY);
 
     // Erode image
     cv::Mat img_erode;
@@ -213,16 +241,12 @@ int main(int argc, char** argv)
     cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2 * morph_size + 1, 2 * morph_size + 1),
                                             cv::Point(morph_size, morph_size));
 
-    cv::erode(img_glob_th_180, img_erode, element, cv::Point(-1, -1), 1);
+    cv::erode(img_bin, img_erode, element, cv::Point(-1, -1), 1);
 
     // Fill holes
     cv::Mat img_floodfill;
     img_erode.copyTo(img_floodfill);
     cv::floodFill(img_floodfill, cv::Point(0, 0), cv::Scalar(0));
-
-    /**
-     *  Watershed
-     */
 
     // Dist_transf         = -bwdist(~BW);
     cv::Mat dist_transf;
@@ -231,128 +255,36 @@ int main(int argc, char** argv)
 
     cv::distanceTransform(img_floodfill_not, dist_transf, cv::DIST_L2, 3);
 
-    cv::Mat dist_transf_sign;
-    dist_transf_sign = dist_transf * -1;
+    // cv::Mat dist_transf_sign;
+    // dist_transf_sign = dist_transf * -1;
 
-    // Dist_transf(~BW)    = Inf;
-    cv::Mat masky;
-    cv::Mat ok;
-    dist_transf_sign.copyTo(ok);
-    cv::inRange(img_floodfill_not, cv::Scalar(0, 0, 0), cv::Scalar(0, 0, 0), masky);
-    ok.setTo(cv::Scalar(255, 255, 255), masky);
+    cv::Mat sure_bg;
+    getBackground(img_floodfill_not, sure_bg);
+    mimik::vision::imshowScaled("Sure Background", sure_bg, 0.4);
 
-    cv::Mat allo;
+    cv::Mat sure_fg;
+    getForeground(img_floodfill_not, sure_fg);
+    mimik::vision::imshowScaled("Sure Foreground", sure_fg, 0.4);
 
-    allo = 255 - dist_transf_sign;
+    cv::Mat markers = cv::Mat::zeros(sure_bg.size(), CV_32S);
+    std::vector<std::vector<cv::Point>> contours;
+    findMarker(sure_bg, markers, contours);
+    cv::circle(markers, cv::Point(5, 5), 3, cv::Scalar(255), -1);  // Drawing Circle around the marker
 
-    // Complement the distance transform,
-    // cv::Mat oh;
-    // dist_transf.convertTo(oh, CV_8UC3);
-
-    // cv::Mat markers1 = cv::Mat::zeros(oh.size(), CV_32S);
-    // cv::watershed(oh, markers1);
-
-    // mimik::vision::imshowScaled("watershed", markers1, 0.4);
-
-    mimik::vision::imshowScaled("allo", allo, 0.4);
-    mimik::vision::imshowScaled("masky", masky, 0.4);
-    mimik::vision::imshowScaled("ok", ok, 0.4);
-    mimik::vision::imshowScaled("Distance trans", dist_transf, 0.4);
-    mimik::vision::imshowScaled("Distance trans sign", dist_transf_sign, 0.4);
-
-    // watersheed
-    // https://docs.opencv.org/4.x/d2/dbd/tutorial_distance_transform.html
-
-    // Create a kernel that we will use to sharpen our image
-    cv::Mat kernel = (cv::Mat_<float>(3, 3) << 1, 1, 1, 1, -8, 1, 1, 1,
-                      1);  // an approximation of second derivative, a quite strong kernel
-
-    // do the laplacian filtering as it is
-    // well, we need to convert everything in something more deeper then CV_8U
-    // because the kernel has some negative values,
-    // and we can expect in general to have a Laplacian image with negative values
-    // BUT a 8bits unsigned int (the one we are working with) can contain values from 0 to 255
-    // so the possible negative number will be truncated
-    cv::Mat imgLaplacian;
-    filter2D(img_original_crop, imgLaplacian, CV_32F, kernel);
-    cv::Mat sharp;
-    img_original_crop.convertTo(sharp, CV_32F);
-    cv::Mat imgResult = sharp - imgLaplacian;
-
-    // convert back to 8bits gray scale
-    imgResult.convertTo(imgResult, CV_8UC3);
-    imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
-
-    // Perform the distance transform algorithm
-    cv::Mat dist;
-    cv::Mat dist_temp;
-    distanceTransform(img_floodfill, dist_temp, cv::DIST_L2, 3);
-
-    cv::bitwise_not(dist_temp, dist);
-
-    // Normalize the distance image for range = {0.0, 1.0}
-    // so we can visualize and threshold it
-    normalize(dist, dist, 0, 1.0, cv::NORM_MINMAX);
-    mimik::vision::imshowScaled("Distance Transform image", dist, 0.4);
-
-    // Threshold to obtain the peaks
-    // This will be the markers for the foreground objects
-    threshold(dist, dist, 0.4, 1.0, cv::THRESH_BINARY);
-
-    // Dilate a bit the dist image
-    cv::Mat kernel1 = cv::Mat::ones(3, 3, CV_8U);
-    dilate(dist, dist, kernel1);
-    mimik::vision::imshowScaled("Peaks", dist, 0.4);
-
-    // Create the CV_8U version of the distance image
-    // It is needed for findContours()
-    cv::Mat dist_8u;
-    dist.convertTo(dist_8u, CV_8U);
-
-    // Find total markers
-    std::vector<std::vector<cv::Point> > contours;
-    findContours(dist_8u, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-    // Create the marker image for the watershed algorithm
-    cv::Mat markers = cv::Mat::zeros(dist.size(), CV_32S);
-
-    // Draw the foreground markers
-    for (size_t i = 0; i < contours.size(); i++)
-    {
-      drawContours(markers, contours, static_cast<int>(i), cv::Scalar(static_cast<int>(i) + 1), -1);
-    }
-
-    // Draw the background marker
-    circle(markers, cv::Point(5, 5), 3, cv::Scalar(255), -1);
-    cv::Mat markers8u;
-    markers.convertTo(markers8u, CV_8U, 10);
-    mimik::vision::imshowScaled("Markers", markers8u, 0.4);
-    cv::waitKey(0);
-
-    // Perform the watershed algorithm
-    watershed(imgResult, markers);
-    // mimik::vision::imshowScaled("WaterShed", markers, 0.4);
+    cv::watershed(img_original_crop, markers);
 
     cv::Mat mark;
     markers.convertTo(mark, CV_8U);
-    bitwise_not(mark, mark);
-    mimik::vision::imshowScaled("Markers_v2", mark, 0.4);
-    // image looks like at that point
+    cv::bitwise_not(mark, mark);  // Convert white to black and black to white
+    mimik::vision::imshowScaled("MARKER", mark, 0.4);
 
-    // Generate random colors
+    /* Highliting Markers in the image */
+
     std::vector<cv::Vec3b> colors;
-    for (size_t i = 0; i < contours.size(); i++)
-    {
-      int b = cv::theRNG().uniform(0, 256);
-      int g = cv::theRNG().uniform(0, 256);
-      int r = cv::theRNG().uniform(0, 256);
-
-      colors.push_back(cv::Vec3b((uchar)b, (uchar)g, (uchar)r));
-    }
+    getRandomColor(colors, contours.size());
 
     // Create the result image
     cv::Mat dst = cv::Mat::zeros(markers.size(), CV_8UC3);
-
     // Fill labeled objects with random colors
     for (int i = 0; i < markers.rows; i++)
     {
@@ -360,87 +292,48 @@ int main(int argc, char** argv)
       {
         int index = markers.at<int>(i, j);
         if (index > 0 && index <= static_cast<int>(contours.size()))
-        {
           dst.at<cv::Vec3b>(i, j) = colors[index - 1];
-        }
       }
     }
 
-    // Visualize the final image
+    // cv::Mat img_bin;
+    // cv::morphologyEx(img_binary, img_bin, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(3, 3), CV_8U));
+
+    // cv::Mat labels;
+    // cv::Mat stats;
+    // cv::Mat centroids;
+    // int connectivity = 4;
+
+    // int label_count = cv::connectedComponentsWithStats(markers, labels, stats, centroids, connectivity);
+
+    // for (int i = 0; i < label_count; i++)
+    // {
+    //   int x = stats.at<int>(i, cv::CC_STAT_LEFT);
+    //   int y = stats.at<int>(i, cv::CC_STAT_TOP);
+    //   int w = stats.at<int>(i, cv::CC_STAT_WIDTH);
+    //   int h = stats.at<int>(i, cv::CC_STAT_HEIGHT);
+    //   int area = stats.at<int>(i, cv::CC_STAT_AREA);
+    //   double cx = centroids.at<double>(i, 0);
+    //   double cy = centroids.at<double>(i, 1);
+    //   // https://insightfultscript.com/collections/programming/cpp/opencv/opencv-watershed/
+
+    //   cv::circle(img_original_crop, cv::Point(cx, cy), 2, cv::viz::Color::red(), -1);
+
+    //   // ...
+    // }
+
     mimik::vision::imshowScaled("Final Result", dst, 0.4);
+    mimik::vision::imshowScaled("Orignal with Centroids", img_original_crop, 0.4);
 
-    //
-    cv::Mat img_blurr;
-    cv::GaussianBlur(img_gray, img_blurr, cv::Size(5, 5), 0);
+    // https://insightfultscript.com/collections/programming/cpp/opencv/opencv-watershed/
 
-    // Convert to Otsu's Binarization
-    cv::Mat img_binary;
-    cv::threshold(img_blurr, img_binary, 170, 255, cv::THRESH_BINARY + cv::THRESH_OTSU);
+    // Dist_transf(~BW)    = Inf;
+    // cv::Mat masky;
+    // cv::Mat ok;
+    // dist_transf_sign.copyTo(ok);
+    // cv::inRange(img_floodfill_not, cv::Scalar(0, 0, 0), cv::Scalar(0, 0, 0), masky);
+    // ok.setTo(cv::Scalar(255, 255, 255), masky);
 
-    cv::Mat img_adaptive_mean;
-    cv::adaptiveThreshold(img_gray, img_adaptive_mean, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 15, 4);
-
-    cv::Mat img_gaussian_mean;
-    cv::adaptiveThreshold(img_gray, img_gaussian_mean, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 15, 4);
-
-    //
-    cv::Mat img_bin;
-    cv::morphologyEx(img_binary, img_bin, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(3, 3), CV_8U));
-
-    cv::Mat labels;
-    cv::Mat stats;
-    cv::Mat centroids;
-    int connectivity = 4;
-
-    int label_count = cv::connectedComponentsWithStats(img_floodfill, labels, stats, centroids, connectivity);
-
-    for (int i = 0; i < label_count; i++)
-    {
-      int x = stats.at<int>(i, cv::CC_STAT_LEFT);
-      int y = stats.at<int>(i, cv::CC_STAT_TOP);
-      int w = stats.at<int>(i, cv::CC_STAT_WIDTH);
-      int h = stats.at<int>(i, cv::CC_STAT_HEIGHT);
-      int area = stats.at<int>(i, cv::CC_STAT_AREA);
-      double cx = centroids.at<double>(i, 0);
-      double cy = centroids.at<double>(i, 1);
-
-      cv::circle(img_original_crop, cv::Point(cx, cy), 2, cv::viz::Color::red(), -1);
-
-      // ...
-    }
-
-    // std::cout << "labels = \n" << labels << std::endl;
-    // std::cout << "stats = \n" << stats << std::endl;
-    // std::cout << "centroids = \n" << centroids << std::endl;
-
-    // double a = mimik::vision::findBackgroundTone(img_gray);
-    // cv::imwrite("/home/captain-yoshi/a.jpg", img_original_crop);
-    // cv::imwrite("/home/captain-yoshi/b.jpg", img_gray);
-
-    // cv::CC_STA
-    mimik::vision::imshowScaled("yolo", img_original_crop, 0.4);
-    mimik::vision::imshowScaled("Erode", img_erode, 0.4);
-    mimik::vision::imshowScaled("Floodfill", img_floodfill, 0.4);
-
-    mimik::vision::imshowScaled("BRG2GRAY", img_gray, 0.1);
-    mimik::vision::imshowScaled("blur", img_blurr, 0.1);
-    mimik::vision::imshowScaled("Otsu's Binarization", img_binary, 0.2);
-    mimik::vision::imshowScaled("Global Threshold = 180", img_glob_th_180, 0.4);
-    mimik::vision::imshowScaled("Global Threshold Adaptive Mean", img_adaptive_mean, 0.2);
-    mimik::vision::imshowScaled("Global Threshold Gaussian Mean", img_gaussian_mean, 0.2);
-    mimik::vision::imshowScaled("Morphology Ex", img_bin, 0.1);
-
-    // print images
-    // cv::imshow("Original image Scaled " + std::to_string(scale), img_scale);
-    // cv::imshow("Original image scaled converted to grayscale", img_grayscale);
-    // cv::imshow("Grayscale image filtered w/ median blurring order " + std::to_string(median_blur_order), img_blur);
-    // cv::imshow("Detected circle", img_circle);
-    // cv::imshow("Mask scaled", mask);
-    // cv::imshow("Original image scaled masked", img_mask);
-    // cv::imshow("Original image scaled cropped", img_mask_crop);
-    // cv::imshow("Big mask", mask_);
-    // cv::imshow("Original image masked", img_original_mask);
-    // cv::imshow("Original image masked + cropped", img_original_crop);
     cv::waitKey(0);
   }
 
