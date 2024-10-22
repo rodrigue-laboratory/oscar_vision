@@ -15,6 +15,7 @@
   <depend>sensor_msgs</depend>
   <depend>image_geometry</depend>
   <depend>cv_bridge</depend>
+  <depend>opencv</depend>
   <depend>eigen</depend>
   <depend>google_cloud_cpp_vision</depend>
 

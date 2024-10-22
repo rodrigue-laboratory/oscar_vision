@@ -3,6 +3,7 @@ project(mimik_vision)
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(OpenCV REQUIRED COMPONENTS core highgui imgproc imgcodecs)
 find_package(realsense2 2.50.0)
 find_package(Eigen3 REQUIRED)
 find_package(google_cloud_cpp_vision REQUIRED)
