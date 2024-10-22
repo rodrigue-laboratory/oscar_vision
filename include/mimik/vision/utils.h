@@ -3,6 +3,11 @@
 #include <ctime>
 #include <string>
 
+#include <filesystem>
+
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
+
 namespace mimik {
 namespace vision {
 
@@ -28,6 +33,30 @@ inline std::string time_stamp(const std::string& fmt = "%F %T")
   auto bt = localtime_xp(std::time(0));
   char buf[64];
   return { buf, std::strftime(buf, sizeof(buf), fmt.c_str(), &bt) };
+}
+
+/// store image + filename
+struct ImageDescription
+{
+  cv::Mat image;
+  std::string filename;
+};
+
+void loadImagesFromOpenCV(const std::string& directory_path, std::vector<ImageDescription>& image_descriptions)
+{
+  for (const auto& entry : std::filesystem::directory_iterator(directory_path))
+  {
+    if (entry.is_directory())
+      continue;
+
+    const auto& path = entry.path();
+
+    image_descriptions.emplace_back();
+
+    auto& image_description = image_descriptions.back();
+    image_description.filename = path.filename();
+    image_description.image = cv::imread(path);
+  }
 }
 
 }  // namespace vision
