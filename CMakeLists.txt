@@ -28,6 +28,7 @@ catkin_package(
   DEPENDS
     EIGEN3
     google_cloud_cpp_vision
+    realsense2
 )
 
 
@@ -41,6 +42,13 @@ add_library(${PROJECT_NAME}
   src/opencv.cpp
   src/google_cloud_ocr.cpp
   src/google_cloud_vision_conversions.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}
+  realsense2
+  # compile error:
+  #     relocation R_X86_64_PC32 against symbol `_ZTVN6google5cloud6vision2v16VertexE' can not be used when making a shared object; recompile with -fPIC
+  # google-cloud-cpp::vision
 )
 
 add_executable(analyse_bacterial_colonies src/analyse_bacterial_colonies.cpp)

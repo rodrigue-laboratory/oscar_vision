@@ -18,5 +18,6 @@
   <depend>opencv</depend>
   <depend>eigen</depend>
   <depend>google_cloud_cpp_vision</depend>
+  <depend>realsense2</depend>
 
 </package>
