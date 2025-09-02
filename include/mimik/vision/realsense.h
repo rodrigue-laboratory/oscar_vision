@@ -40,6 +40,8 @@ public:
   bool enableStreamingSensors();
   bool disableStreamingSensors();
 
+  bool isRGBImageReady(double max_elapsed_time = 1.0);
+
   bool resetCamera();
   sensor_msgs::Image::ConstPtr getRGBImage();
   sensor_msgs::Image::ConstPtr getDepthImage();

@@ -183,6 +183,24 @@ bool RealSenseCamera::disableStreamingSensors()
   return true;
 }
 
+bool RealSenseCamera::isRGBImageReady(double max_elapsed_time)
+{
+  ros::Time begin = ros::Time::now();
+
+  const auto image = getRGBImage();
+  if (!image)
+    return false;
+
+  double time_diff = std::abs(image->header.stamp.toSec() - begin.toSec());
+
+  if (time_diff > max_elapsed_time)
+  {
+    ROS_INFO_STREAM("elapsed time " << time_diff << " > " << max_elapsed_time);
+    return false;
+  }
+  return true;
+}
+
 bool RealSenseCamera::resetCamera()
 {
   std_srvs::Empty req;
