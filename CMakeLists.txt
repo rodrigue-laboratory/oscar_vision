@@ -57,8 +57,8 @@ target_link_libraries(annotate_images ${PROJECT_NAME} ${realsense2_LIBRARY} ${ca
 add_executable(d415_crop src/d415_crop.cpp)
 target_link_libraries(d415_crop ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
-add_executable(d415_perspective_transform src/d415_perspective_transform.cpp)
-target_link_libraries(d415_perspective_transform ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
+# add_executable(d415_perspective_transform src/d415_perspective_transform.cpp)
+# target_link_libraries(d415_perspective_transform ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
 add_executable(d415_projection src/d415_projection.cpp)
 target_link_libraries(d415_projection ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
@@ -74,7 +74,7 @@ install(TARGETS
   ${PROJECT_NAME}
   annotate_images
   d415_crop
-  d415_perspective_transform
+  #d415_perspective_transform
   d415_projection
   d415_text_detection
   google_cloud_vision_quickstart

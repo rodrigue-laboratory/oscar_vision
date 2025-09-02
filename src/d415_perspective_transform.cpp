@@ -48,8 +48,7 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <mimik_ur3_cog/transform_frame.h>
+//#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 static const std::string OPENCV_WINDOW = "Image window";
 
@@ -71,11 +70,11 @@ int main(int argc, char** argv)
     throw std::runtime_error("Cannot retrieve image or camera info");
 
   // Create MoveIt PlanningScene
-  auto tf_buffer = std::make_shared<tf2_ros::Buffer>();
-  auto tf_listener = tf2_ros::TransformListener(*tf_buffer);
+  // auto tf_buffer = std::make_shared<tf2_ros::Buffer>();
+  // auto tf_listener = tf2_ros::TransformListener(*tf_buffer);
 
-  planning_scene_monitor::PlanningSceneMonitor psm("robot_description", tf_buffer);
-  planning_scene::PlanningScene& scene{ *psm.getPlanningScene() };
+  // planning_scene_monitor::PlanningSceneMonitor psm("robot_description", tf_buffer);
+  // planning_scene::PlanningScene& scene{ *psm.getPlanningScene() };
 
   // geometry_msgs::TransformStamped tf;
   // tf = mimik::ur3_cog::transformFrame("camera_color_optical_frame", eig_offset, , scene);
