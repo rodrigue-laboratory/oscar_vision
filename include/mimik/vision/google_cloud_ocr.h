@@ -11,6 +11,7 @@
 // #include <cv_bridge/cv_bridge.h>
 
 #include "google/cloud/vision/v1/text_annotation.pb.h"
+#include "google/cloud/vision/v1/geometry.pb.h"
 
 #include <opencv2/imgproc.hpp>
 
