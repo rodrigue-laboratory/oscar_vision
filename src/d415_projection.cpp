@@ -47,12 +47,9 @@
 void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
 {
   std::cout << "===============================cameraInfoCallback===============================" << std::endl;
-  // float point[3] = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
-  // float pixel[2];
+  Eigen::Vector3d point = { 0.0329881, -0.00995912, 0.179683 };
 
-  Eigen::Vector3d point = { 0.05073265677540176, -0.050817407132633746, 0.4202557940053254 };
   Eigen::Vector2d pixel;
-
   std::cout << "3D point" << std::endl;
   std::cout << "x = " << point[0] << std::endl;
   std::cout << "y = " << point[1] << std::endl;
@@ -84,13 +81,14 @@ void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& info_msg)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "pickplace_pcr_thermocycler");
+  ros::init(argc, argv, "d415_projection");
   ros::NodeHandle nh, pnh("~");
 
   // Handle Task introspection requests from RViz & feedback during execution
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
+  ROS_INFO("Subscribing to /camera/color/camera_info");
   ros::Subscriber sub = nh.subscribe("/camera/color/camera_info", 1000, cameraInfoCallback);
 
   ros::waitForShutdown();
