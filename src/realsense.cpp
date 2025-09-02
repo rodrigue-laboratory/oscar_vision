@@ -68,6 +68,20 @@ void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen
   point[2] = static_cast<double>(fpoint[2]);
 }
 
+double convertDistanceToPixel(const sensor_msgs::CameraInfo::ConstPtr& info_msg, double depth, double distance_m)
+{
+  Eigen::Vector3d point1{ -distance_m / 2.0, 0, depth };
+  Eigen::Vector3d point2{ distance_m / 2.0, 0, depth };
+
+  Eigen::Vector2d pixel1;
+  Eigen::Vector2d pixel2;
+
+  projection(info_msg, point1, pixel1);
+  projection(info_msg, point2, pixel2);
+
+  return (pixel1 - pixel2).norm();
+}
+
 cv::Mat cropImageFrom3DPoints(const sensor_msgs::CameraInfo::ConstPtr& info_msg,
                               const sensor_msgs::Image::ConstPtr& image_msg, const Eigen::Vector3d& topleft_point,
                               const Eigen::Vector3d& bottomright_point)

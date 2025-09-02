@@ -24,6 +24,9 @@ void projection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::
 void deprojection(const sensor_msgs::CameraInfo::ConstPtr& info_msg, const Eigen::Vector2d& pixels, double depth,
                   Eigen::Vector3d& point);
 
+/// convert distance coordinate to pixel coordinate
+double convertDistanceToPixel(const sensor_msgs::CameraInfo::ConstPtr& info_msg, double depth, double distance_m);
+
 cv::Mat cropImageFrom3DPoints(const sensor_msgs::CameraInfo::ConstPtr& info_msg,  //
                               const sensor_msgs::Image::ConstPtr& image_msg,      //
                               const Eigen::Vector3d& topleft_point,               // top    = -Y axis, left  = -X axis
