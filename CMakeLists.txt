@@ -51,9 +51,6 @@ target_link_libraries(${PROJECT_NAME}
   # google-cloud-cpp::vision
 )
 
-add_executable(analyse_bacterial_colonies src/analyse_bacterial_colonies.cpp)
-target_link_libraries(analyse_bacterial_colonies ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)
-
 add_executable(annotate_images src/annotate_images.cpp)
 target_link_libraries(annotate_images ${PROJECT_NAME} ${realsense2_LIBRARY} ${catkin_LIBRARIES} google-cloud-cpp::vision)
 
@@ -75,7 +72,6 @@ target_link_libraries(google_cloud_vision_quickstart ${PROJECT_NAME} ${realsense
 
 install(TARGETS
   ${PROJECT_NAME}
-  analyse_bacterial_colonies
   annotate_images
   d415_crop
   d415_perspective_transform
