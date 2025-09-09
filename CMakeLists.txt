@@ -46,6 +46,7 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   realsense2
+  Eigen3::Eigen
   # compile error:
   #     relocation R_X86_64_PC32 against symbol `_ZTVN6google5cloud6vision2v16VertexE' can not be used when making a shared object; recompile with -fPIC
   # google-cloud-cpp::vision
