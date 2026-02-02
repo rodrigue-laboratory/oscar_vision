@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mimik_vision)
+project(oscar_vision)
 
 set(CMAKE_CXX_STANDARD 17)
 

@@ -2,7 +2,7 @@
 
 #include <opencv2/imgproc.hpp>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 void drawBoxes(cv::Mat& image, const std::vector<std::vector<cv::Point>>& points, cv::Scalar color);
@@ -14,4 +14,4 @@ void imshowScaled(const cv::String& winname, cv::InputArray mat, double scaling_
 double findBackgroundTone(const cv::Mat& grayscale_image);
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>mimik_vision</name>
+  <name>oscar_vision</name>
   <version>0.0.0</version>
   <description>Vision algorithm examples</description>
 

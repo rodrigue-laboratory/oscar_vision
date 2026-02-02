@@ -8,7 +8,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 // https://stackoverflow.com/a/38034148
@@ -60,4 +60,4 @@ void loadImagesFromOpenCV(const std::string& directory_path, std::vector<ImageDe
 }
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

@@ -10,7 +10,7 @@
 #include <librealsense2/h/rs_types.h>
 #include <cv_bridge/cv_bridge.h>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 void sensorCameraInfoMsgToRS2Intrinsics(const sensor_msgs::CameraInfo::ConstPtr& info_msg, rs2_intrinsics& intrinsics);
@@ -82,4 +82,4 @@ private:
 };
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

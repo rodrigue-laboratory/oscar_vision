@@ -43,7 +43,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include <mimik/vision/realsense.h>
+#include <oscar/vision/realsense.h>
 
 static const std::string OPENCV_WINDOW = "Image window";
 
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
   ros::AsyncSpinner spinner(4);
   spinner.start();
 
-  mimik::vision::RealSenseCamera rs(nh, "/camera");
+  oscar::vision::RealSenseCamera rs(nh, "/camera");
   ros::Duration(1).sleep();
   auto image_msg = rs.getRGBImage();
   auto info_msg = rs.getRGBCameraInfo();
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
   cv::imshow(OPENCV_WINDOW, cv_ptr->image);
   cv::waitKey(0);
 
-  cv::Mat cropped_image = mimik::vision::cropImageFrom3DPoints(info_msg,            //
+  cv::Mat cropped_image = oscar::vision::cropImageFrom3DPoints(info_msg,            //
                                                                image_msg,           //
                                                                topleft_point,       // top    = -Y axis, left  = -X axis
                                                                bottomright_point);  // bottom = +Y axis, right = +X axis

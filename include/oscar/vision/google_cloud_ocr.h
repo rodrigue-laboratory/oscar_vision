@@ -15,7 +15,7 @@
 
 #include <opencv2/imgproc.hpp>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 enum class FeatureType : uint8_t
@@ -31,4 +31,4 @@ std::vector<google::cloud::vision::v1::BoundingPoly>
 getDocumentBounds(const google::cloud::vision::v1::TextAnnotation& document, FeatureType feature);
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

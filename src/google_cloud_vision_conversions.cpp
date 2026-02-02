@@ -1,6 +1,6 @@
-#include <mimik/vision/google_cloud_vision_conversions.h>
+#include <oscar/vision/google_cloud_vision_conversions.h>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 void boundingPolyToOpenCV(const std::vector<google::cloud::vision::v1::BoundingPoly>& bounds,
@@ -16,4 +16,4 @@ void boundingPolyToOpenCV(const std::vector<google::cloud::vision::v1::BoundingP
 }
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

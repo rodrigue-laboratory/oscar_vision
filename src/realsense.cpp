@@ -1,4 +1,4 @@
-#include <mimik/vision/realsense.h>
+#include <oscar/vision/realsense.h>
 #include <std_srvs/Empty.h>
 #include <std_srvs/SetBool.h>
 
@@ -9,7 +9,7 @@
 
 #include <librealsense2/rsutil.h>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 void sensorCameraInfoMsgToRS2Intrinsics(const sensor_msgs::CameraInfo::ConstPtr& info_msg, rs2_intrinsics& intrinsics)
@@ -313,4 +313,4 @@ bool RealSenseCamera::setDepthAutoExposureROI(int left, int right, int top, int 
 }
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

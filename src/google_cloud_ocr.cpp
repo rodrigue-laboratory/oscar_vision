@@ -1,6 +1,6 @@
-#include <mimik/vision/google_cloud_ocr.h>
+#include <oscar/vision/google_cloud_ocr.h>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 std::vector<google::cloud::vision::v1::BoundingPoly>
@@ -35,4 +35,4 @@ getDocumentBounds(const google::cloud::vision::v1::TextAnnotation& document, Fea
 }
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar

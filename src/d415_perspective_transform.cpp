@@ -43,7 +43,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include <mimik/vision/realsense.h>
+#include <oscar/vision/realsense.h>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
   spinner.start();
 
   // Get image from realsense RGB Stream
-  mimik::vision::RealSenseCamera rs(nh, "/camera");
+  oscar::vision::RealSenseCamera rs(nh, "/camera");
   ros::Duration(1).sleep();
   auto image_msg = rs.getRGBImage();
   auto info_msg = rs.getRGBCameraInfo();
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
   // planning_scene::PlanningScene& scene{ *psm.getPlanningScene() };
 
   // geometry_msgs::TransformStamped tf;
-  // tf = mimik::ur3_cog::transformFrame("camera_color_optical_frame", eig_offset, , scene);
+  // tf = oscar::ur3_cog::transformFrame("camera_color_optical_frame", eig_offset, , scene);
 
   cv::namedWindow(OPENCV_WINDOW);
   auto cv_ptr = cv_bridge::toCvShare(image_msg);

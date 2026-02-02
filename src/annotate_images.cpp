@@ -47,12 +47,12 @@
 #include <opencv2/highgui/highgui.hpp>
 // #include <opencv2/highgui/highgui.hpp>
 
-#include <mimik/vision/utils.h>
+#include <oscar/vision/utils.h>
 
-#include <mimik/vision/realsense.h>
-#include <mimik/vision/opencv.h>
-#include <mimik/vision/google_cloud_ocr.h>
-#include <mimik/vision/google_cloud_vision_conversions.h>
+#include <oscar/vision/realsense.h>
+#include <oscar/vision/opencv.h>
+#include <oscar/vision/google_cloud_ocr.h>
+#include <oscar/vision/google_cloud_vision_conversions.h>
 
 #include <fstream>
 
@@ -133,23 +133,23 @@ int main(int argc, char** argv)
     {
       const auto& document = response.full_text_annotation();
 
-      auto bounds_block = mimik::vision::getDocumentBounds(document, mimik::vision::FeatureType::BLOCK);
-      auto bounds_para = mimik::vision::getDocumentBounds(document, mimik::vision::FeatureType::PARA);
-      auto bounds_word = mimik::vision::getDocumentBounds(document, mimik::vision::FeatureType::WORD);
+      auto bounds_block = oscar::vision::getDocumentBounds(document, oscar::vision::FeatureType::BLOCK);
+      auto bounds_para = oscar::vision::getDocumentBounds(document, oscar::vision::FeatureType::PARA);
+      auto bounds_word = oscar::vision::getDocumentBounds(document, oscar::vision::FeatureType::WORD);
 
       std::vector<std::vector<cv::Point>> pts_block;
       std::vector<std::vector<cv::Point>> pts_para;
       std::vector<std::vector<cv::Point>> pts_word;
 
-      mimik::vision::boundingPolyToOpenCV(bounds_block, pts_block);
-      mimik::vision::boundingPolyToOpenCV(bounds_para, pts_para);
-      mimik::vision::boundingPolyToOpenCV(bounds_word, pts_word);
+      oscar::vision::boundingPolyToOpenCV(bounds_block, pts_block);
+      oscar::vision::boundingPolyToOpenCV(bounds_para, pts_para);
+      oscar::vision::boundingPolyToOpenCV(bounds_word, pts_word);
 
       auto& cv_image = cv_images[image_index++];
 
-      mimik::vision::drawBoxes(cv_image, pts_block, cv::Scalar(0, 0, 255));
-      mimik::vision::drawBoxes(cv_image, pts_para, cv::Scalar(255, 0, 0));
-      mimik::vision::drawBoxes(cv_image, pts_word, cv::Scalar(255, 255, 0));
+      oscar::vision::drawBoxes(cv_image, pts_block, cv::Scalar(0, 0, 255));
+      oscar::vision::drawBoxes(cv_image, pts_para, cv::Scalar(255, 0, 0));
+      oscar::vision::drawBoxes(cv_image, pts_word, cv::Scalar(255, 255, 0));
 
       cv::namedWindow(OPENCV_WINDOW);
       cv::imshow(OPENCV_WINDOW, cv_image);
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
     std::string filepath = input_path;
     if (filepath.back() != '/')
       filepath += '/';
-    filepath += "annotations_" + mimik::vision::time_stamp() + "/";
+    filepath += "annotations_" + oscar::vision::time_stamp() + "/";
 
     if (std::filesystem::is_directory(filepath))
       throw std::runtime_error("filepath already exists: " + filepath);

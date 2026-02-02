@@ -1,10 +1,10 @@
-#include <mimik/vision/opencv.h>
+#include <oscar/vision/opencv.h>
 
 #include <opencv2/highgui/highgui.hpp>
 
 #include <iostream>
 
-namespace mimik {
+namespace oscar {
 namespace vision {
 
 void drawBoxes(cv::Mat& image, const std::vector<std::vector<cv::Point>>& points, cv::Scalar color)
@@ -73,4 +73,4 @@ double findBackgroundTone(const cv::Mat& grayscale_image)
 }
 
 }  // namespace vision
-}  // namespace mimik
+}  // namespace oscar
